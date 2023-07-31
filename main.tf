@@ -193,3 +193,43 @@ resource "aws_security_group" "http_s" {
 #     Name = "Example Instance"
 #   }
 # }
+
+resource "aws_security_group" "rds_sg" {
+  name_prefix = "rds-sg-"
+  vpc_id      = aws_vpc.vpc.id
+
+  # Allow inbound traffic for MySQL from specific sources
+  ingress {
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+
+resource "aws_db_subnet_group" "example_db_subnet_group" {
+  name       = "example-db-subnet-group"
+  subnet_ids = aws_subnet.private_subnet.*.id  # Use the private subnet for the RDS instance
+}
+
+
+resource "aws_db_instance" "sc_uat_read_replica_DR_Test" {
+  allocated_storage    = 20  # Adjust as needed
+  engine               = "mysql"
+  engine_version       = "8.0.28"  # Change to your desired version
+  instance_class       = "db.t2.micro"  # Adjust as needed
+  identifier           = "example-rds"
+  db_name              = "sc_21_04_11"
+  username             = "root"  # Change to your desired username
+  password             = "a3Lqziu2vqnAun"  # Change to your desired password
+  db_subnet_group_name = aws_db_subnet_group.example_db_subnet_group.name
+  vpc_security_group_ids = [aws_security_group.rds_sg.id]
+}
