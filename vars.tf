@@ -22,3 +22,7 @@ variable "private_subnets_cidr" {
   default     = ["10.0.3.0/24", "10.0.4.0/24"]
   description = "CIDR block for Private Subnet"
 }
+
+variable "spring_profile" {
+  default     = "drtest"
+}
